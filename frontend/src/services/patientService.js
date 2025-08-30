@@ -2,72 +2,126 @@
 
 import axios from 'axios';
 
-// The base URL for your backend API
-const API_URL = 'http://localhost:5000/api/patient';
+const API_URL = 'http://localhost:5000/api/patient'; // Use the full, direct URL
 
-// A helper function to get the auth token from localStorage
 const getAuthToken = () => {
   return localStorage.getItem('token');
 };
 
-/**
- * Fetches the logged-in patient's profile from the backend.
- * @returns {Promise<object>} - A promise that resolves to the patient's profile data.
- */
-const getProfile = async () => {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error('No token found, please log in.');
-  }
+const getAuthHeaders = () => {
+    const token = getAuthToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
+const handleApiError = (error) => {
+    if (error.response?.status === 401 || error.response?.status === 403) {
+        console.error("Authentication error. Logging out.");
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        window.location.href = '/login';
+    }
+    const message = (error.response?.data?.message) || error.message;
+    throw new Error(message);
+};
+
+// --- Profile Functions ---
+const getProfile = async () => {
   try {
-    const response = await axios.get(`${API_URL}/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.get(`${API_URL}/profile`, { headers: getAuthHeaders() });
     return response.data;
   } catch (error) {
-    // Extract a more specific error message from the backend if available
-    const message =
-      (error.response && error.response.data && error.response.data.message) ||
-      error.message ||
-      error.toString();
-    throw new Error(message);
+    handleApiError(error);
   }
 };
 
-/**
- * Updates or creates the patient's profile.
- * @param {object} profileData - The data for the profile to be updated.
- * @returns {Promise<object>} - A promise that resolves to the updated profile data.
- */
 const updateProfile = async (profileData) => {
-  const token = getAuthToken();
-  if (!token) {
-    throw new Error('No token found, please log in.');
-  }
-
   try {
-    const response = await axios.post(`${API_URL}/profile`, profileData, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await axios.post(`${API_URL}/profile`, profileData, { headers: getAuthHeaders() });
     return response.data;
   } catch (error) {
-    const message =
-      (error.response && error.response.data && error.response.data.message) ||
-      error.message ||
-      error.toString();
-    throw new Error(message);
+    handleApiError(error);
   }
+};
+
+// --- Document Functions ---
+const getDocuments = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/documents`, { headers: getAuthHeaders() });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+const getDocument = async (documentId) => {
+    try {
+        const response = await axios.get(`${API_URL}/documents/${documentId}`, { headers: getAuthHeaders() });
+        return response.data;
+    } catch (error) {
+        throw new Error(err.message || 'An unknown error occurred.');
+    }
+};
+
+const uploadDocument = async (formData) => {
+    try {
+        const response = await axios.post(`${API_URL}/documents`, formData, {
+            headers: {
+                ...getAuthHeaders(),
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+    }
+};
+
+const deleteDocument = async (documentId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/documents/${documentId}`, { headers: getAuthHeaders() });
+        return response.data;
+    } catch (error) {
+        handleApiError(error);
+    }
+};
+
+// नया function - document को view करने के लिए secure URL get करना
+const getDocumentViewUrl = async (documentId) => {
+    try {
+        const response = await axios.get(`${API_URL}/documents/${documentId}/view`, { 
+            headers: getAuthHeaders(),
+            // यह important है कि हम redirect को follow न करें
+            maxRedirects: 0,
+            validateStatus: function (status) {
+                return status >= 200 && status < 400; // 3xx भी accept करें
+            }
+        });
+        
+        // अगर redirect response मिला तो location header से URL निकालें
+        if (response.status === 302 && response.headers.location) {
+            return response.headers.location;
+        }
+        
+        return response.data?.viewUrl || response.data?.fileURL;
+    } catch (error) {
+        if (error.response?.status === 302) {
+            // Redirect response में URL मिल गया
+            return error.response.headers.location;
+        }
+        handleApiError(error);
+    }
 };
 
 const patientService = {
+  // Profile functions
   getProfile,
   updateProfile,
+  // Document functions
+  getDocuments,
+  getDocument,
+  uploadDocument,
+  deleteDocument,
+  getDocumentViewUrl, // नया function add किया
 };
 
 export default patientService;

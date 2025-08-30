@@ -1,3 +1,5 @@
+// frontend/src/context/AuthContext.jsx
+
 import React, { createContext, useState, useEffect } from 'react';
 import authService from '../services/authService';
 import { jwtDecode } from 'jwt-decode'; // JWT टोकन को डिकोड करने के लिए
@@ -14,8 +16,9 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem('token');
     if (token) {
       try {
+        // UPDATED: Decode email from token
         const decodedUser = jwtDecode(token);
-        setUser({ id: decodedUser.id, role: decodedUser.role });
+        setUser({ id: decodedUser.id, role: decodedUser.role, email: decodedUser.email });
       } catch (error) {
         console.error("Invalid token:", error);
         // अगर टोकन अमान्य है तो उसे हटा दें
@@ -29,8 +32,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const data = await authService.login(credentials);
+      // UPDATED: Decode email from token
       const decodedUser = jwtDecode(data.token);
-      setUser({ id: decodedUser.id, role: decodedUser.role });
+      setUser({ id: decodedUser.id, role: decodedUser.role, email: decodedUser.email });
       return data; // लॉगिन कंपोनेंट को डेटा वापस भेजें
     } catch (error) {
       throw error;

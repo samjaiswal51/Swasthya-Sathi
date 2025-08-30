@@ -8,6 +8,7 @@ import PatientDashboard from './pages/PatientDashboard';
 import DoctorDashboard from './pages/DoctorDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import FamilyDashboard from './pages/FamilyDashboard';
+import DocumentViewer from './components/patient/DocumentViewer';
 
 // PrivateRoute component to protect dashboards
 const PrivateRoute = ({ children, requiredRole }) => {
@@ -44,6 +45,17 @@ function App() {
           </PrivateRoute>
         }
       />
+      
+      {/* Document Viewer Route - Patient specific */}
+      <Route
+        path="/patient-dashboard/document-viewer/:id"
+        element={
+          <PrivateRoute requiredRole="patient">
+            <DocumentViewer />
+          </PrivateRoute>
+        }
+      />
+
       <Route
         path="/doctor-dashboard"
         element={
