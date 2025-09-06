@@ -1,0 +1,38 @@
+# Dependencies
+# Ignores node_modules folders everywhere
+node_modules/
+
+# Environment Variables
+# Ignores .env files everywhere, including in backend and frontend
+.env
+.env.*
+backend/.env
+frontend/.env
+
+# Firebase Admin Key (CRITICAL)
+backend/config/serviceAccountKey.json
+
+# Build output
+dist
+dist-ssr
+/frontend/dist
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor directories and files
+.vscode/
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

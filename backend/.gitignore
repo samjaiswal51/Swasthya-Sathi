@@ -1,0 +1,32 @@
+# Dependencies
+/node_modules
+/backend/node_modules
+/frontend/node_modules
+
+# Environment Variables
+# Ignore .env files in all locations
+.env
+.env.*
+backend/.env
+frontend/.env
+
+# Firebase Admin Key (CRITICAL)
+backend/config/serviceAccountKey.json
+
+# Build output
+/dist
+/frontend/dist
+
+# Logs and cache
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
+
+# Uploaded files
+/uploads
+
+# Editor/OS specific files
+.DS_Store
+*.log
+.vscode/

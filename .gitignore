@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.*
+backend/.env
+frontend/.env
+
+# Firebase Admin Key (CRITICAL)
+backend/config/serviceAccountKey.json
+
+# Build output
+dist
+dist-ssr
+/frontend/dist
+
+# Logs and OS files
+*.log
+.DS_Store
