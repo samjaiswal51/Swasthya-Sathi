@@ -27,6 +27,7 @@
     "natural": "^8.1.0",
     "node-cron": "^4.2.1",
     "node-fetch": "^2.6.7",
+    "node-summarizer": "^1.0.7",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^2.16.105",
     "streamifier": "^0.1.1",
