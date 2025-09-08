@@ -1,16 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // Import useContext
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { AuthContext } from '../context/AuthContext'; // Import AuthContext directly
 
 function Register() {
   const [formData, setFormData] = useState({
+    name: '',
     email: '',
     password: '',
     role: 'patient',
   });
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
-  const { register } = useAuth();
+  // Use useContext with AuthContext instead of the custom hook
+  const { register } = useContext(AuthContext); 
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -56,6 +58,27 @@ function Register() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* NEW: Name Input Field */}
+            <div>
+              <label className="block text-sm font-medium text-[#CCC9DC] mb-2">Full Name</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-[#CCC9DC] text-opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  className="w-full pl-10 pr-3 py-3 bg-[#0C1821] bg-opacity-50 border border-[#324A5F] rounded-lg focus:outline-none focus:ring-2 focus:ring-[#CCC9DC] text-[#CCC9DC] placeholder-[#CCC9DC] placeholder-opacity-30"
+                  placeholder="Your Full Name"
+                  required
+                />
+              </div>
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-[#CCC9DC] mb-2">Email</label>
               <div className="relative">
@@ -170,3 +193,4 @@ function Register() {
 }
 
 export default Register;
+
