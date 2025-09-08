@@ -14,7 +14,8 @@ const generateToken = (id, role, email) => {
 // @route   POST /api/auth/register
 // @access  Public
 exports.registerUser = async (req, res) => {
-    const { email, password, role } = req.body;
+    // UPDATED: Destructure name from req.body
+    const { name, email, password, role } = req.body;
 
     try {
         // Check if user already exists
@@ -25,7 +26,9 @@ exports.registerUser = async (req, res) => {
         }
 
         // Create a new user with the specified role
+        // UPDATED: Include name when creating the user
         user = await User.create({
+            name,
             email,
             password,
             role,
