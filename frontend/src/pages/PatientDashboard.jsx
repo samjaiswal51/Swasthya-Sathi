@@ -1,20 +1,18 @@
-// frontend/src/pages/PatientDashboard.jsx
-
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiUser, FiFileText, FiBookOpen, FiLogOut,
-  FiSettings, FiHelpCircle, FiCreditCard, FiBell // <-- Import new icon
+  FiSettings, FiHelpCircle, FiCreditCard, FiBell, FiSearch // <-- नया आइकन इम्पोर्ट करें
 } from 'react-icons/fi';
 
-// Import the new components
 import Profile from '../components/patient/Profile';
 import MedicalDocuments from '../components/patient/MedicalDocuments';
 import PdfSummarizer from '../components/patient/PdfSummarizer';
 import SwasthyaCard from '../components/patient/SwasthyaCard';
-import MedicationReminders from '../components/patient/MedicationReminders'; // <-- IMPORT NEW COMPONENT
+import MedicationReminders from '../components/patient/MedicationReminders';
+import FindDoctor from '../components/patient/FindDoctor'; // <-- नया कंपोनेंट इम्पोर्ट करें
 
 function PatientDashboard() {
   const { user, logout } = useAuth();
@@ -36,8 +34,10 @@ function PatientDashboard() {
         return <PdfSummarizer />;
       case 'swasthyaCard':
         return <SwasthyaCard />;
-      case 'reminders': // <-- ADD NEW CASE
+      case 'reminders':
         return <MedicationReminders />;
+      case 'findDoctor': // <-- नया केस जोड़ें
+        return <FindDoctor />;
       default:
         return <Profile />;
     }
@@ -47,7 +47,8 @@ function PatientDashboard() {
     { id: 'profile', label: 'Profile', icon: FiUser },
     { id: 'swasthyaCard', label: 'Swasthya Card', icon: FiCreditCard },
     { id: 'documents', label: 'Medical Documents', icon: FiFileText },
-    { id: 'reminders', label: 'Reminders', icon: FiBell }, // <-- ADD NEW NAV ITEM
+    { id: 'findDoctor', label: 'Find a Doctor', icon: FiSearch }, // <-- नया नेविगेशन आइटम जोड़ें
+    { id: 'reminders', label: 'Reminders', icon: FiBell },
     { id: 'summarizer', label: 'PDF Summarizer', icon: FiBookOpen },
   ];
 
