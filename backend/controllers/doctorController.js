@@ -74,3 +74,28 @@ exports.getCurrentDoctorProfile = asyncHandler(async (req, res) => {
 
   res.status(200).json(profile);
 });
+
+// @desc    Get all approved doctors with optional search
+// @route   GET /api/doctor
+// @access  Private
+exports.getAllDoctors = asyncHandler(async (req, res) => {
+  const { search } = req.query;
+
+  // IMPORTANT: Only fetch doctors with 'Approved' status
+  const query = { verificationStatus: 'Approved' };
+
+  // If search term exists, add it to the query
+  if (search) {
+    const searchRegex = new RegExp(search, 'i'); // Case-insensitive regex
+    query.$or = [
+      { fullName: { $regex: searchRegex } },
+      { specialization: { $regex: searchRegex } },
+    ];
+  }
+
+  const doctors = await DoctorProfile.find(query)
+    .populate('user', 'name email')
+    .select('fullName profilePicture specialization yearsOfExperience');
+
+  res.status(200).json(doctors);
+});
