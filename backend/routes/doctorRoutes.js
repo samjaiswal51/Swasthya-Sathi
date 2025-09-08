@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createOrUpdateProfile, getCurrentDoctorProfile } = require('../controllers/doctorController');
+const { createOrUpdateProfile, getCurrentDoctorProfile, getAllDoctors } = require('../controllers/doctorController');
 const { protect } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 
@@ -13,6 +13,10 @@ const restrictTo = (...roles) => {
     next();
   };
 };
+
+router
+  .route('/')
+  .get(protect, getAllDoctors); // Route to get all approved doctors with search functionality
 
 router
   .route('/profile')
