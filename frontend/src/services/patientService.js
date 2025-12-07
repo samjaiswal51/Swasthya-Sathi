@@ -2,159 +2,175 @@
 
 import axios from 'axios';
 
-// The base URL for patient-specific APIs remains the same for profile/documents
-const API_URL_PATIENT = 'http://localhost:5000/api/patient';
-// A new base URL for the reminders API
-const API_URL_REMINDERS = 'http://localhost:5000/api/reminders';
-// --- NEW: API URL for user-specific actions ---
-const API_URL_USER = 'http://localhost:5000/api/user';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-const getAuthToken = () => {
-  return localStorage.getItem('token');
-};
+const API_URL_PATIENT   = `${API_BASE_URL}/api/patient`;
+const API_URL_REMINDERS = `${API_BASE_URL}/api/reminders`;
+const API_URL_USER      = `${API_BASE_URL}/api/user`;
+
+const getAuthToken = () => localStorage.getItem('token');
 
 const getAuthHeaders = () => {
-    const token = getAuthToken();
-    return token ? { Authorization: `Bearer ${token}` } : {};
+  const token = getAuthToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 const handleApiError = (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
-        console.error("Authentication error. Logging out.");
-        localStorage.removeItem('token');
-        localStorage.removeItem('role');
-        window.location.href = '/login';
-    }
-    const message = (error.response?.data?.message) || error.message;
-    throw new Error(message);
+  if (error.response?.status === 401 || error.response?.status === 403) {
+    console.error('Authentication error. Logging out.');
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    window.location.href = '/login';
+  }
+  const message = error.response?.data?.message || error.message;
+  throw new Error(message);
 };
 
-// --- Swasthya Card Function (No changes) ---
-const getSwasthyaCard = async () => {
+// Swasthya Card
+export const getSwasthyaCard = async () => {
   try {
-    const response = await axios.get(`${API_URL_PATIENT}/profile/swasthya-card`, { headers: getAuthHeaders() });
+    const response = await axios.get(`${API_URL_PATIENT}/profile/swasthya-card`, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-// --- Profile Functions (No changes) ---
-const getProfile = async () => {
+// Profile
+export const getProfile = async () => {
   try {
-    const response = await axios.get(`${API_URL_PATIENT}/profile`, { headers: getAuthHeaders() });
+    const response = await axios.get(`${API_URL_PATIENT}/profile`, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-const updateProfile = async (profileData) => {
+export const updateProfile = async (profileData) => {
   try {
-    const response = await axios.post(`${API_URL_PATIENT}/profile`, profileData, { headers: getAuthHeaders() });
+    const response = await axios.post(`${API_URL_PATIENT}/profile`, profileData, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-// --- Document Functions (No changes) ---
-const getDocuments = async () => {
+// Documents
+export const getDocuments = async () => {
   try {
-    const response = await axios.get(`${API_URL_PATIENT}/documents`, { headers: getAuthHeaders() });
+    const response = await axios.get(`${API_URL_PATIENT}/documents`, {
+      headers: getAuthHeaders(),
+    });
     return response.data;
   } catch (error) {
     handleApiError(error);
   }
 };
 
-const getDocument = async (documentId) => {
-    try {
-        const response = await axios.get(`${API_URL_PATIENT}/documents/${documentId}`, { headers: getAuthHeaders() });
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-    }
+export const getDocument = async (documentId) => {
+  try {
+    const response = await axios.get(`${API_URL_PATIENT}/documents/${documentId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-const uploadDocument = async (formData) => {
-    try {
-        const response = await axios.post(`${API_URL_PATIENT}/documents`, formData, {
-            headers: {
-                ...getAuthHeaders()
-            },
-        });
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-    }
+export const uploadDocument = async (formData) => {
+  try {
+    const response = await axios.post(`${API_URL_PATIENT}/documents`, formData, {
+      headers: {
+        ...getAuthHeaders(),
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-const deleteDocument = async (documentId) => {
-    try {
-        const response = await axios.delete(`${API_URL_PATIENT}/documents/${documentId}`, { headers: getAuthHeaders() });
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-    }
+export const deleteDocument = async (documentId) => {
+  try {
+    const response = await axios.delete(`${API_URL_PATIENT}/documents/${documentId}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-const getDocumentViewUrl = async (documentId) => {
-    try {
-        const response = await axios.get(`${API_URL_PATIENT}/documents/${documentId}/view`, { 
-            headers: getAuthHeaders(),
-            maxRedirects: 0,
-            validateStatus: (status) => status >= 200 && status < 400,
-        });
-        
-        if (response.status === 302 && response.headers.location) {
-            return response.headers.location;
-        }
-        
-        return response.data?.viewUrl || response.data?.fileURL;
-    } catch (error) {
-        if (error.response?.status === 302) {
-            return error.response.headers.location;
-        }
-        handleApiError(error);
-    }
+export const getDocumentViewUrl = async (documentId) => {
+  try {
+    const response = await axios.get(
+      `${API_URL_PATIENT}/documents/${documentId}/view`,
+      {
+        headers: getAuthHeaders(),
+        maxRedirects: 0,
+        validateStatus: (status) => status >= 200 && status < 400,
+      }
+    );
+    return response.request.responseURL;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-// --- Medication Reminder Functions (No changes) ---
-const getReminders = async () => {
-    try {
-        const response = await axios.get(API_URL_REMINDERS, { headers: getAuthHeaders() });
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-    }
+// Reminders
+export const getReminders = async () => {
+  try {
+    const response = await axios.get(API_URL_REMINDERS, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-const createReminder = async (reminderData) => {
-    try {
-        const response = await axios.post(API_URL_REMINDERS, reminderData, { headers: getAuthHeaders() });
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-    }
+export const createReminder = async (data) => {
+  try {
+    const response = await axios.post(API_URL_REMINDERS, data, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-const deleteReminder = async (reminderId) => {
-    try {
-        const response = await axios.delete(`${API_URL_REMINDERS}/${reminderId}`, { headers: getAuthHeaders() });
-        return response.data;
-    } catch (error) {
-        handleApiError(error);
-    }
+export const deleteReminder = async (id) => {
+  try {
+    const response = await axios.delete(`${API_URL_REMINDERS}/${id}`, {
+      headers: getAuthHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
-const saveFcmToken = async (token) => {
-    try {
-        await axios.post(`${API_URL_USER}/save-fcm-token`, { token }, { headers: getAuthHeaders() });
-        console.log("FCM token sent to server successfully.");
-    } catch (error) {
-        console.error("Could not save FCM token to server.", error);
-    }
+// Save FCM token
+export const saveFcmToken = async (token) => {
+  try {
+    const response = await axios.post(
+      `${API_URL_USER}/save-fcm-token`,
+      { token },
+      { headers: getAuthHeaders() }
+    );
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
 const patientService = {
@@ -169,7 +185,6 @@ const patientService = {
   getReminders,
   createReminder,
   deleteReminder,
-  // --- EXPORT THE NEW FUNCTION ---
   saveFcmToken,
 };
 

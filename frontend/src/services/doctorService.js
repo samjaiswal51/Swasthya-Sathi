@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api/doctor';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_URL = `${API_BASE_URL}/api/doctor`;
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
@@ -12,17 +13,16 @@ const getAuthHeaders = () => {
 };
 
 const handleApiError = (error) => {
-  // Handle authentication errors
   if (error.response?.status === 401 || error.response?.status === 403) {
-    console.error("Authentication error. Redirecting to login.");
+    console.error('Authentication error. Redirecting to login.');
     localStorage.removeItem('token');
     localStorage.removeItem('role');
     window.location.href = '/login';
     return;
   }
-  
-  // Extract error message
-  const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+
+  const message =
+    error.response?.data?.message || error.message || 'An unexpected error occurred';
   throw new Error(message);
 };
 
@@ -52,13 +52,12 @@ const createOrUpdateProfile = async (profileData) => {
 
 const getAllDoctors = async (searchTerm = '') => {
   try {
-    const config = { ...getAuthHeaders() };
-    
-    // Only add search parameter if searchTerm is provided and not empty
+    const config = getAuthHeaders();
+
     if (searchTerm && searchTerm.trim()) {
       config.params = { search: searchTerm.trim() };
     }
-    
+
     const response = await axios.get(API_URL, config);
     return response.data;
   } catch (error) {
