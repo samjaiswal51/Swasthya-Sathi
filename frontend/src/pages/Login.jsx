@@ -3,12 +3,13 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { HeartPulse, CheckCircle2, Loader2, ArrowRight, Lock, Mail } from 'lucide-react';
+import { HeartPulse, CheckCircle2, Loader2, ArrowRight, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const { login } = useContext(AuthContext);
@@ -164,13 +165,20 @@ const Login = () => {
                   </div>
                   <input
                     name="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-4 py-3.5 bg-[#151821] border border-[rgba(255,255,255,0.05)] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
+                    className="w-full pl-11 pr-12 py-3.5 bg-[#151821] border border-[rgba(255,255,255,0.05)] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
                   />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
                 </div>
               </motion.div>
 

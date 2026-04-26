@@ -3,7 +3,7 @@ import { AuthContext } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
-import { HeartPulse, CheckCircle2, Loader2, ArrowRight } from 'lucide-react';
+import { HeartPulse, CheckCircle2, Loader2, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 const Register = () => {
@@ -14,6 +14,8 @@ const Register = () => {
     confirmPassword: '',
     role: 'patient'
   });
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -25,6 +27,15 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Password strength validation
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{6,}$/;
+    if (!passwordRegex.test(formData.password)) {
+      toast.error('Password must be at least 6 characters and include letters & numbers.', {
+        style: { background: '#ef4444', color: '#fff' }
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match', {
         style: {
@@ -186,28 +197,46 @@ const Register = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <motion.div variants={itemVariant} className="space-y-1">
                   <label className="text-sm font-medium text-[#D1D5DB] ml-1">Password</label>
-                  <input
-                    name="password"
-                    type="password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-[#151821] border border-[rgba(255,255,255,0.05)] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      className="w-full pl-4 pr-12 py-3.5 bg-[#151821] border border-[rgba(255,255,255,0.05)] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors"
+                    >
+                      {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </motion.div>
 
                 <motion.div variants={itemVariant} className="space-y-1">
                   <label className="text-sm font-medium text-[#D1D5DB] ml-1">Confirm Password</label>
-                  <input
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    placeholder="••••••••"
-                    className="w-full px-4 py-3.5 bg-[#151821] border border-[rgba(255,255,255,0.05)] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
-                  />
+                  <div className="relative">
+                    <input
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      required
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      className="w-full pl-4 pr-12 py-3.5 bg-[#151821] border border-[rgba(255,255,255,0.05)] rounded-xl text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-transparent transition-all"
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors"
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                    </button>
+                  </div>
                 </motion.div>
               </div>
 
