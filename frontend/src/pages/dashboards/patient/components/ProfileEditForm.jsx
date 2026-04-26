@@ -114,7 +114,7 @@ const ProfileEditForm = ({
             <div>
               <Label required>Date of Birth</Label>
               {/* Ensure standard date picker works within dark mode via color-scheme CSS or standard styling */}
-              <input required type="date" name="dob" value={formData.dob} onChange={handleChange} className={`${inputStyle} [color-scheme:dark]`} />
+              <input required type="date" name="dob" max={new Date().toISOString().split('T')[0]} value={formData.dob} onChange={handleChange} className={`${inputStyle} [color-scheme:dark]`} />
             </div>
             <div>
               <Label>Age (Calculated)</Label>

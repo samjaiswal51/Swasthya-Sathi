@@ -256,7 +256,7 @@ const DoctorOnboardingStepper = ({ onComplete }) => {
                       <option value="">Select Gender</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option>
                     </select>
                   </div>
-                  <div><label className={labelCls}>Date of Birth *</label><input type="date" name="dob" value={formData.dob} onChange={handleInputChange} className={inputCls} /></div>
+                  <div><label className={labelCls}>Date of Birth *</label><input type="date" max={new Date().toISOString().split('T')[0]} name="dob" value={formData.dob} onChange={handleInputChange} className={inputCls} /></div>
                 </div>
               </motion.div>
             )}
@@ -304,6 +304,29 @@ const DoctorOnboardingStepper = ({ onComplete }) => {
                   <div className="md:col-span-2">
                     <label className={labelCls}>About Doctor (Bio)</label>
                     <textarea name="bio" value={formData.bio} onChange={handleInputChange} rows="3" className={inputCls} placeholder="Brief description of your expertise..." />
+                  </div>
+
+                  {/* Clinic Address Section */}
+                  <div className="md:col-span-2 mt-4 pt-6 border-t border-emerald-500/10">
+                    <h3 className="text-sm font-extrabold text-emerald-600 uppercase tracking-widest mb-4">Clinic / Hospital Address</h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                      <div className="sm:col-span-2">
+                        <label className={labelCls}>Street Address</label>
+                        <input type="text" name="clinicAddress" value={formData.clinicAddress} onChange={handleInputChange} className={inputCls} placeholder="123 Health Ave" />
+                      </div>
+                      <div>
+                        <label className={labelCls}>City</label>
+                        <input type="text" name="city" value={formData.city} onChange={handleInputChange} className={inputCls} placeholder="Mumbai" />
+                      </div>
+                      <div>
+                        <label className={labelCls}>State</label>
+                        <input type="text" name="state" value={formData.state} onChange={handleInputChange} className={inputCls} placeholder="Maharashtra" />
+                      </div>
+                      <div>
+                        <label className={labelCls}>PIN Code</label>
+                        <input type="text" name="pincode" value={formData.pincode} onChange={handleInputChange} className={inputCls} placeholder="400001" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </motion.div>

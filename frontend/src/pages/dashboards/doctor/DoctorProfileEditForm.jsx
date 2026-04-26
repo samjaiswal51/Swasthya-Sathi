@@ -180,7 +180,7 @@ const DoctorProfileEditForm = ({ profile, onSave, onCancel }) => {
               <option value="">Select</option><option>Male</option><option>Female</option><option>Other</option>
             </select>
           </Field>
-          <Field label="Date of Birth"><input type="date" className={inputCls} value={form.dob} onChange={e => set('dob', e.target.value)} /></Field>
+          <Field label="Date of Birth"><input type="date" max={new Date().toISOString().split('T')[0]} className={inputCls} value={form.dob} onChange={e => set('dob', e.target.value)} /></Field>
         </div>
       </Card>
 
