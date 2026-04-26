@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-50: #eff6ff;
+  --color-primary-100: #dbeafe;
+  --color-primary-200: #bfdbfe;
+  --color-primary-300: #93c5fd;
+  --color-primary-400: #60a5fa;
+  --color-primary-500: #3b82f6;
+  --color-primary-600: #2563eb;
+  --color-primary-700: #1d4ed8;
+  --color-primary-800: #1e40af;
+  --color-primary-900: #1e3a8a;
+}
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  }
+}
+
+/* ── LIGHT THEME ──────────────────────────────────── */
+html.theme-light {
+  --theme-bg: #F0F6FF;
+  --theme-sidebar-bg: #ffffff;
+  --theme-card-bg: rgba(255,255,255,0.95);
+  --theme-card-border: rgba(37,99,235,0.12);
+  --theme-text-primary: #0F172A;
+  --theme-text-muted: #64748B;
+  --theme-header-bg: rgba(255,255,255,0.92);
+}
+
+html.theme-light body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+/* Override dark glass panels in light mode */
+html.theme-light .bg-\[rgba\(10\,22\,40\,0\.88\)\] {
+  background-color: var(--theme-header-bg) !important;
+  border-bottom-color: rgba(37,99,235,0.15) !important;
+}
+html.theme-light .bg-\[\#0A1628\]\/95,
+html.theme-light .bg-\[rgba\(255\,255\,255\,0\.03\)\],
+html.theme-light .bg-white\/\[0\.03\],
+html.theme-light .bg-white\/\[0\.04\] {
+  background-color: var(--theme-card-bg) !important;
+}
+html.theme-light .text-slate-100,
+html.theme-light .text-slate-200 {
+  color: var(--theme-text-primary) !important;
+}
+html.theme-light .text-slate-400,
+html.theme-light .text-slate-500 {
+  color: var(--theme-text-muted) !important;
+}
+
+/* ── DARK THEME ───────────────────────────────────── */
+html.theme-dark {
+  --theme-bg: #111827;
+  --theme-sidebar-bg: #1F2937;
+  --theme-card-bg: rgba(31,41,55,0.98);
+  --theme-card-border: rgba(75,85,99,0.4);
+  --theme-text-primary: #F9FAFB;
+  --theme-text-muted: #9CA3AF;
+  --theme-header-bg: rgba(17,24,39,0.95);
+}
+
+html.theme-dark body {
+  background-color: var(--theme-bg) !important;
+  color: var(--theme-text-primary) !important;
+}
+
+html.theme-dark .bg-\[rgba\(10\,22\,40\,0\.88\)\] {
+  background-color: var(--theme-header-bg) !important;
+}
+html.theme-dark .bg-\[rgba\(255\,255\,255\,0\.03\)\],
+html.theme-dark .bg-white\/\[0\.03\],
+html.theme-dark .bg-white\/\[0\.04\] {
+  background-color: var(--theme-card-bg) !important;
+}
+html.theme-dark .text-slate-100,
+html.theme-dark .text-slate-200 {
+  color: var(--theme-text-primary) !important;
+}
+html.theme-dark .text-slate-400,
+html.theme-dark .text-slate-500 {
+  color: var(--theme-text-muted) !important;
+}
+
+/* Smooth theme transition */
+body, header, aside, main, .bg-white {
+  transition: background-color 0.3s ease, color 0.25s ease, border-color 0.25s ease !important;
+}
+
+/* Hide scrollbar utility */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* ── DOCTOR THEME SEPARATION ──────────────────────── */
+html.doctor-theme-light body {
+  background-color: #ECFDF5 !important; /* Emerald-50 */
+}
+
+html.doctor-theme-dark body {
+  background-color: #022C22 !important; /* Emerald-950 */
+}
+
