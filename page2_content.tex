@@ -1,0 +1,154 @@
+% ============================================================
+%  PAGE 2 CONTENT — System Architecture, Database Design,
+%  and Key Module Implementation
+%  This file is a continuation of page1_content.tex.
+%  In the final paper, paste Sections III & IV after Section II.
+% ============================================================
+
+%-------------------------------------------------------
+% SECTION III: SYSTEM ARCHITECTURE
+%-------------------------------------------------------
+\section{System Architecture}
+
+\subsection{Overall Architecture}
+
+Swasthya Sathi follows a three-tier client-server architecture comprising a React.js Single-Page Application (SPA) frontend, a Node.js/Express.js REST API backend, and a MongoDB document database. The backend additionally incorporates a Socket.io layer for real-time bidirectional communication, a node-cron scheduler for time-driven reminder execution, and a Multer-based local file storage service for medical documents and profile images. Fig.~\ref{fig:arch} illustrates the high-level architecture.
+
+\begin{figure}[h]
+\centering
+\begin{verbatim}
++---------------------------+
+|   React.js SPA (Vite)     |
+|  4 Role-Based Dashboards  |
+|  AuthContext | ThemeCtx   |
++------------+--------------+
+             | HTTP + WebSocket
+             v
++---------------------------+
+| Node.js + Express.js      |
+| 19 REST API Route Groups  |
+| Socket.io (real-time)     |
+| Multer  | node-cron       |
+| JWT Auth Middleware        |
++------------+--------------+
+             | Mongoose ODM
+             v
++---------------------------+
+|  MongoDB (Local / Atlas)  |
+|  20 Document Collections  |
++---------------------------+
+\end{verbatim}
+\caption{Swasthya Sathi Three-Tier Architecture}
+\label{fig:arch}
+\end{figure}
+
+\subsection{Frontend Architecture}
+
+The frontend is bootstrapped with Vite and organized around role-specific dashboard layouts. The \texttt{App.jsx} root component defines all client-side routes using React Router v6, with a custom \texttt{ProtectedRoute} wrapper enforcing role-based access. Each dashboard (Patient, Doctor, Admin, Family) is a persistent layout component rendering a sidebar, header, and an \texttt{<Outlet>} for nested page components. A global \texttt{AuthContext} manages the authenticated user object, JWT token persistence in \texttt{localStorage}, and logout state. The \texttt{ThemeContext} provides light/dark theme switching. Framer Motion provides page transition animations throughout.
+
+The doctor dashboard additionally implements a global verification status banner—rendered in \texttt{DoctorDashboard.jsx} outside the page outlet—that notifies unverified doctors on every dashboard page except the dedicated verification status page, which provides detailed admin feedback and resubmission controls.
+
+\subsection{Backend Architecture}
+
+The Express.js server (\texttt{server.js}) mounts 19 route groups under structured URI namespaces (\texttt{/api/auth}, \texttt{/api/patient/profile}, \texttt{/api/doctor}, \texttt{/api/admin}, \texttt{/api/appointments}, etc.). All private routes pass through a JWT authentication middleware that verifies the Bearer token and attaches a \texttt{req.user} object containing the user's \texttt{id} and \texttt{role}. Admin-only routes apply an additional role-check middleware. File uploads are handled by Multer with configurable storage destinations and file-type filters. The Socket.io instance is initialized after server startup and shares the same HTTP server instance, enabling co-deployment on a single port.
+
+\subsection{Real-Time Communication Layer}
+
+The \texttt{socket.js} module implements a JWT-authenticated Socket.io middleware layer. Upon connection, each socket is identified by the user's JWT payload, and the user's socket ID is stored in an in-memory \texttt{Map<userId, socketId>} for online presence tracking. The server supports five socket event types: \texttt{joinRoom} (entering a conversation namespace), \texttt{sendMessage} (persisting and broadcasting messages), \texttt{forwardMessage} (file attachment forwarding), \texttt{typing} (indicator broadcast within room), and \texttt{seenMessage} (batch read-receipt update with unread count reset in the \texttt{Conversation} document).
+
+\subsection{Scheduled Services}
+
+A \texttt{cronService.js} module uses node-cron to execute a scheduled job every minute, querying all active \texttt{Reminder} documents whose scheduled time matches the current system time. On a match, a \texttt{Notification} document is created and delivered to the patient via the Socket.io presence map if the patient is online.
+
+%-------------------------------------------------------
+% SECTION IV: DATABASE DESIGN
+%-------------------------------------------------------
+\section{Database Design}
+
+The MongoDB database comprises 20 document collections organized into five functional groups, as summarized in Table~\ref{tab:collections}.
+
+\begin{table}[h]
+\caption{MongoDB Collections by Functional Group}
+\label{tab:collections}
+\centering
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Functional Group} & \textbf{Collections} \\
+\hline
+Authentication \& Identity & \texttt{User}, \texttt{DoctorProfile}, \texttt{PatientProfile} \\
+\hline
+Clinical Data & \texttt{UpdateRequest}, \texttt{ClinicalNote}, \\
+              & \texttt{MedicalDocument}, \texttt{ReportAnalysis} \\
+\hline
+Scheduling & \texttt{Appointment}, \texttt{Availability}, \texttt{Reminder} \\
+\hline
+Communication & \texttt{Conversation}, \texttt{Message}, \texttt{Notification} \\
+\hline
+Platform \& Analytics & \texttt{Payment}, \texttt{HealthTip}, \texttt{PostLike}, \\
+                      & \texttt{ProfileView}, \texttt{DoctorFollower}, \\
+                      & \texttt{DoctorPatientLink}, \texttt{Complaint} \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Core Document Schemas}
+
+\textbf{User}: The root authentication document stores \texttt{name}, \texttt{email} (unique indexed), bcrypt-hashed \texttt{password}, \texttt{role} (enum: patient/doctor/family), and \texttt{isSuspended} flag. Admin access is implemented via a fixed super-credential environment variable pair (\texttt{ADMIN\_EMAIL}, \texttt{ADMIN\_PASSWORD}) rather than a stored database record, preventing admin account enumeration.
+
+\textbf{PatientProfile}: A one-to-one extension of \texttt{User} storing personal data (DOB, gender, mobile, address), medical data (blood group with validated enum, height/cm, weight/kg, allergies array, diseases array, current medications, disability), lifestyle data (smoker status, alcohol consumption, marital status, occupation), emergency contact (name, relation, primary and alternate mobile), and two unique indexed tokens: \texttt{swasthyaCardId} and \texttt{qrToken} for QR-based emergency access. A \texttt{scanCount} field and \texttt{lastScannedAt} timestamp track emergency card usage.
+
+\textbf{DoctorProfile}: A one-to-one extension of \texttt{User} capturing professional credentials (registration number, degree, specialization, experience years), operational data (hospital name, consultation fee, languages, bio, consultation mode), geographic data (clinic address, city, state, pincode), nested \texttt{availability} (days array, morning/evening start and end times), nested \texttt{documents} (Cloudinary/local URLs for degree certificate, license certificate, ID proof), and a \texttt{verificationStatus} enum (pending/approved/rejected) with a \texttt{rejectionReason} text field, \texttt{isProfileComplete} boolean, and \texttt{verifiedAt} timestamp.
+
+\textbf{UpdateRequest}: Records a doctor's proposed change to a patient record. Fields include \texttt{type} (enum: Diagnosis/Prescription/Notes/Advice/Allergy Update/Test Recommendation/Other), a nested \texttt{changes} object containing diagnosis text, a prescriptions array (each with medicineName, dose, frequency, duration), advice, notes, allergies, and test fields, a \texttt{priority} enum (Normal/Important/Urgent), \texttt{status} (pending/approved/rejected/expired), optional \texttt{patientResponseNote}, \texttt{reviewedAt} timestamp, and \texttt{expiresAt} defaulting to 7 days from creation.
+
+\textbf{Appointment}: Stores the patient-doctor booking with \texttt{date}, \texttt{timeSlot}, \texttt{consultationMode} (Online/Offline), \texttt{status} (pending/confirmed/completed/cancelled), \texttt{symptoms}, and \texttt{fee}. References both \texttt{User} documents via \texttt{patientId} and \texttt{doctorId}.
+
+\subsection{Data Relationships}
+
+Fig.~\ref{fig:erd} summarizes the primary entity relationships.
+
+\begin{figure}[h]
+\centering
+\begin{verbatim}
+User(1)-----(1)PatientProfile
+User(1)-----(1)DoctorProfile
+User(1)-----(N)MedicalDocument
+User(1)-----(N)Appointment
+User(1)-----(N)Reminder
+User(1)-----(N)Notification
+DoctorProfile(1)--(N)UpdateRequest--(1)PatientProfile
+DoctorProfile(1)--(N)Availability
+DoctorProfile(1)--(N)HealthTip
+Conversation(1)--(N)Message
+\end{verbatim}
+\caption{Simplified Entity Relationship Overview}
+\label{fig:erd}
+\end{figure}
+
+%-------------------------------------------------------
+% SECTION V: KEY MODULE IMPLEMENTATION
+%-------------------------------------------------------
+\section{Key Module Implementation}
+
+\subsection{Authentication and Authorization}
+
+Registration enforces role-based constraints: admin self-registration is blocked at the controller level, returning HTTP 403. Email uniqueness is validated before user creation, returning a descriptive \texttt{"Email is already used"} message to the client. Passwords are hashed using bcrypt with 10 salt rounds. On successful registration or login, a JWT payload containing \texttt{\{user: \{id, role\}\}} is signed with a 5-day expiry and returned to the client for \texttt{localStorage} persistence. All private API routes pass through \texttt{authMiddleware.js}, which extracts and verifies the Bearer token, attaches \texttt{req.user}, and rejects requests with HTTP 401 on failure.
+
+Client-side authentication is mediated by \texttt{AuthContext}, which exposes \texttt{login()}, \texttt{register()}, and \texttt{logout()} functions, and hydrates the user state from \texttt{localStorage} on application load. The \texttt{ProtectedRoute} component wraps each dashboard route and redirects unauthenticated or wrong-role users to \texttt{/login}.
+
+\subsection{Doctor Verification Workflow}
+
+The doctor identity verification process begins with a four-step onboarding stepper (\texttt{DoctorOnboardingStepper.jsx}). Step 1 collects basic personal details including a profile photograph, validated date-of-birth (with a browser-enforced maximum date preventing future dates), and mobile number. Step 2 captures professional credentials—medical registration number, degree, specialization, years of experience, consultation fee, hospital name, languages spoken, biography, and clinic address with city, state, and PIN code. Step 3 handles document uploads for degree certificate, medical license, and government-issued ID proof, with client-side size validation (10 MB limit). Step 4 presents a review summary before submission.
+
+On submission, a \texttt{FormData} multipart POST request is sent to \texttt{/api/doctor/profile}. The backend \texttt{upsertProfile} controller blocks resubmission if a pending request already exists, preventing duplicate review queues. For rejected profiles, resubmission resets \texttt{verificationStatus} to pending and clears \texttt{rejectionReason}. The admin reviews submitted documents through the \texttt{DoctorVerification} admin page, which surfaces all pending profiles with document preview links. On approval, \texttt{verifiedAt} is stamped. On rejection, the admin enters a mandatory reason stored in \texttt{rejectionReason}, which is surfaced to the doctor via the global dashboard banner and the dedicated \texttt{VerificationStatusPage}.
+
+\subsection{Patient-Controlled Medical Update Flow}
+
+When a doctor initiates a medical record update, a structured \texttt{UpdateRequest} document is created with the proposed clinical changes and a 7-day expiry window. The patient receives an in-app notification and reviews the request in the \texttt{PatientApprovalDashboard}. The \texttt{PatientApprovalCard} component renders each request with full change details, doctor identity, priority badge, and time remaining before expiry. On patient approval, the backend \texttt{approveRequest} controller atomically updates the \texttt{PatientProfile} document with the approved changes, creates a \texttt{ClinicalNote} for record-keeping, and marks the request as approved with a \texttt{reviewedAt} timestamp. Rejection marks the request without modifying the profile.
+
+\subsection{Swasthya Card Emergency Access}
+
+Each \texttt{PatientProfile} document is assigned a cryptographically unique \texttt{qrToken} on creation. The patient's dashboard renders a QR code encoding the URL \texttt{/emergency/:qrToken}. This route maps to a public Express endpoint (\texttt{/api/public/emergency/:token}) that requires no authentication. The controller queries the \texttt{PatientProfile} by \texttt{qrToken}, increments \texttt{scanCount}, updates \texttt{lastScannedAt}, and returns only the following fields: full name, blood group, known allergies, current medications, and emergency contact details. Private fields (address, financial data, documents) are never included in the public response. The \texttt{EmergencyScanPage} React component renders this data in a clean, high-contrast interface optimized for rapid information consumption by emergency responders.
+
+\end{document}

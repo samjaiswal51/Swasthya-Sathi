@@ -1,0 +1,148 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts
+
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{booktabs}
+
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\begin{document}
+
+\title{Swasthya Sathi: A Role-Based Integrated Digital Healthcare Platform for Real-Time Communication, Centralized Medical Records, and Emergency Access}
+
+\author{
+\IEEEauthorblockN{1\textsuperscript{st} Samarth Jaiswal}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engg.} \\
+\textit{United College of Engg. \& Research}\\
+Prayagraj, India \\
+samjaiswal51@gmail.com}
+\and
+\IEEEauthorblockN{2\textsuperscript{nd} Shanvi Mishra}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engg.} \\
+\textit{United College of Engg. \& Research}\\
+Prayagraj, India \\
+shanvim@ucer.ac.in}
+\and
+\IEEEauthorblockN{3\textsuperscript{rd} Shashank Shukla}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engg.} \\
+\textit{United College of Engg. \& Research}\\
+Prayagraj, India \\
+shashank@ucer.ac.in}
+\and
+\IEEEauthorblockN{4\textsuperscript{th} Shivangi Parashar}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engg.} \\
+\textit{United College of Engg. \& Research}\\
+Prayagraj, India \\
+shivangi@ucer.ac.in}
+\and
+\IEEEauthorblockN{5\textsuperscript{th} Rahul Kesarwani}
+\IEEEauthorblockA{\textit{Dept. of Computer Science \& Engg.} \\
+\textit{United College of Engg. \& Research}\\
+Prayagraj, India \\
+iamrahulkesarwanicse@gmail.com}
+}
+
+\maketitle
+
+%-------------------------------------------------------
+% ABSTRACT
+%-------------------------------------------------------
+\begin{abstract}
+India's healthcare ecosystem suffers from fragmented medical records, delayed emergency responses, exclusion of family caregivers from real-time information, and inadequate patient-physician communication infrastructure. Existing platforms—Practo, 1mg, MyChart—address these problems only partially, offering single-dimension solutions such as appointment booking or teleconsultation without providing a unified, multi-stakeholder ecosystem. This paper presents \textbf{Swasthya Sathi} (``Health Companion''), a full-stack web-based healthcare management platform developed using the MERN stack (MongoDB, Express.js, React.js, Node.js). The system implements four role-based dashboards for Patients, Doctors, Administrators, and Family Members, each offering tailored functionality. Key implemented features include: centralized Electronic Health Records (EHRs) with Cloudinary-backed document storage; a multi-step doctor onboarding and admin-governed verification workflow; real-time encrypted bidirectional chat via Socket.io with typing indicators and read receipts; a QR-code-based emergency health data card (Swasthya Card) with token-secured public API endpoints; an AI-powered medical report analyzer using Tesseract.js OCR; a patient-controlled medical update consent mechanism with 7-day expiry windows; appointment scheduling with slot-based availability management; medication reminders via node-cron; and health tip publishing with like and view analytics. The system enforces security through JWT authentication (5-day token expiry), bcrypt password hashing (10 salt rounds), role-based route middleware, and admin-only super credentials. The platform comprises 20 MongoDB collections, 19 Express.js route groups, and over 50 React.js components organized into role-specific dashboard layouts. Evaluation demonstrates measurable improvements in emergency data accessibility, record centralization, and patient data sovereignty compared to existing solutions.
+\end{abstract}
+
+\begin{IEEEkeywords}
+digital healthcare, MERN stack, electronic health records, role-based access control, Socket.io real-time chat, QR emergency access, doctor verification workflow, patient data sovereignty, Tesseract.js OCR, medication reminders
+\end{IEEEkeywords}
+
+%-------------------------------------------------------
+% SECTION I: INTRODUCTION
+%-------------------------------------------------------
+\section{Introduction}
+
+India's healthcare delivery infrastructure faces a critical digital transformation gap. Despite widespread smartphone penetration and significant post-COVID-19 growth in telemedicine adoption, the fundamental connectivity between patients, physicians, family caregivers, and administrative bodies remains fragmented and inefficient. According to NITI Aayog (2022), approximately 70\% of Indian hospitals lack interoperable Electronic Health Record (EHR) systems \cite{niti2022}, forcing patients to carry physical documents across facilities and creating dangerous information voids during emergencies. The Indian Journal of Emergency Medicine (2020) reports that missing patient data contributes to nearly 30\% of preventable emergency care delays \cite{ijem2020}. The World Health Organization (2021) documents a severe physician shortage in rural India—approximately one doctor per 10,000 population—that compels patients to travel extensively for specialist care that could otherwise be delivered digitally \cite{who2021}.
+
+Medication non-adherence compounds these structural problems: the Lancet (2019) estimates that up to 50\% of patients with chronic conditions miss scheduled doses due to the absence of timely automated reminders \cite{lancet2019}. Furthermore, the Indian Medical Association (2021) reports that approximately 60\% of the population struggles to correctly interpret medical diagnostic reports, particularly in regions with lower health literacy \cite{ima2021}, necessitating AI-assisted report explanation tools.
+
+Existing digital health solutions address these challenges only partially. India's dominant appointment and teleconsultation platforms focus on scheduling and physician discovery but provide no centralized record management, no real-time communication, and no emergency data access mechanisms. Enterprise EHR systems are prohibitively expensive for independent practitioners and rural clinics. No existing platform simultaneously integrates multi-role dashboards, real-time communication, emergency QR access, patient-controlled record consent, and AI-assisted health literacy within a single deployable web application.
+
+To address these systemic gaps, we designed and implemented \textbf{Swasthya Sathi}—a unified, full-stack web application connecting all major stakeholders in the healthcare delivery chain. The system is built on the MERN technology stack and provides four distinct role-based interfaces. The \textbf{Patient Dashboard} enables users to manage comprehensive health profiles (blood group, allergies, medications, lifestyle data, emergency contacts), upload and access medical documents, book appointments, receive medication reminders, analyze medical reports through AI-assisted OCR, communicate with doctors via real-time chat, and access a personal emergency QR card. The \textbf{Doctor Dashboard} provides a verified professional identity system with a multi-step onboarding stepper, patient relationship management, appointment and earnings tracking, schedule management with slot-based availability, health tip publishing with engagement analytics, and real-time patient communication. The \textbf{Admin Dashboard} enables platform governance through doctor identity verification (with document review, approval/rejection, and feedback messaging), user management with account suspension capabilities, and platform-wide analytics. The \textbf{Family Dashboard}, currently implemented as a foundation module, is designed to provide authorized read-only access to linked patient records.
+
+The principal contributions of this work are as follows:
+
+\begin{itemize}
+    \item \textbf{Unified role-based healthcare ecosystem}: A single deployable MERN application serving four distinct stakeholder roles with tailored dashboards, route-level access control via JWT middleware, and React.js \texttt{ProtectedRoute} components.
+
+    \item \textbf{Doctor Verification Workflow}: A multi-step onboarding stepper collecting professional credentials, medical registration numbers, and identity documents (degree certificate, medical license, ID proof), followed by admin-governed approval with structured feedback on rejection. Rejected doctors receive specific admin feedback and may resubmit, resetting verification status to pending.
+
+    \item \textbf{Patient Data Sovereignty Mechanism}: A structured update request system (\texttt{UpdateRequest} MongoDB collection) wherein doctors submit typed change proposals—covering diagnosis, prescriptions (with medicine name, dose, frequency, duration), allergies, test recommendations, and clinical notes—with configurable priority levels (Normal/Important/Urgent) and a 7-day expiry window. Patient approval is mandatory before any modification to the \texttt{PatientProfile} collection occurs.
+
+    \item \textbf{Swasthya Card Emergency Access}: A token-secured, authentication-free public API endpoint (\texttt{/api/public/emergency/:token}) exposing only clinically critical, non-private patient data—blood group, known allergies, emergency contact information—to first responders via QR code scanning, without exposing sensitive address or financial information.
+
+    \item \textbf{Real-Time Communication Infrastructure}: A Socket.io server with JWT-authenticated socket middleware supporting per-conversation room-based messaging, typing indicators, read receipt synchronization (\texttt{seenMessage} events), online presence tracking via an in-memory \texttt{Map}, and unread message count management within \texttt{Conversation} documents.
+
+    \item \textbf{AI-Powered Report Analysis}: Integration of Tesseract.js OCR for extracting structured text from uploaded medical report images and PDFs, improving health literacy for patients who cannot interpret raw diagnostic data.
+\end{itemize}
+
+The remainder of this paper is organized as follows: Section~II reviews related work and characterizes the existing gap. Section~III presents the system architecture and database design. Section~IV details the implementation of key modules. Section~V evaluates the system and provides comparative analysis. Section~VI discusses limitations and future work. Section~VII concludes.
+
+%-------------------------------------------------------
+% SECTION II: RELATED WORK
+%-------------------------------------------------------
+\section{Related Work and Gap Analysis}
+
+\subsection{Digital Health Platform Generations}
+
+Digital health platforms have evolved through three discernible generations. First-generation systems, emerging in the early 2000s, focused on appointment scheduling and basic patient registration, providing no record management or communication tools \cite{lun2005}. Second-generation platforms—including India's Practo, 1mg, and Tata Health—introduced teleconsultation capabilities and basic prescription management but maintained siloed data architectures that prevent longitudinal patient health tracking across providers \cite{praveen2020}. Third-generation enterprise systems, exemplified by Epic MyChart, offer comprehensive EHR management but are deployed exclusively within large hospital networks at significant cost, making them inaccessible to independent practitioners, rural clinics, and individual patients \cite{epic2021}.
+
+\subsection{Role-Based Access in Healthcare Systems}
+
+Mehta et al.~\cite{mehta2019} demonstrated that role-differentiated access control significantly reduces unauthorized data exposure and improves care coordination in multi-stakeholder healthcare platforms. However, their prototype implementation did not address real-time communication, emergency data access, or the complete patient-doctor-admin interaction lifecycle. Swasthya Sathi extends this work by implementing route-level JWT middleware and React \texttt{ProtectedRoute} components enforcing role boundaries across 19 API route groups and four dashboard contexts.
+
+\subsection{QR Code Emergency Medical Access}
+
+Kumar et al.~\cite{kumar2018} demonstrated that equipping first responders with QR-accessible patient health summaries reduced average triage decision time by 23\%. Existing implementations, however, typically use static printed QR codes linked to fixed data snapshots. The Swasthya Card in Swasthya Sathi addresses this limitation by linking each QR token to live \texttt{PatientProfile} database records, ensuring that emergency responders always access current allergy, blood group, and emergency contact data without requiring any login credentials.
+
+\subsection{Patient Data Autonomy}
+
+The ethical and clinical importance of patient control over personal health records is well-established in health informatics \cite{mandl2001}. Standard EHR systems permit clinicians to directly modify patient records without explicit patient consent. Swasthya Sathi's \texttt{UpdateRequest} mechanism operationalizes patient data sovereignty: doctors may only propose changes, which are queued for patient review with a structured 7-day expiry (\texttt{expiresAt} field), priority classification, and an optional patient response note field before any \texttt{PatientProfile} modification is committed.
+
+\subsection{Real-Time Communication in Healthcare}
+
+WebSocket-based real-time communication has been applied in telemedicine for asynchronous consultation \cite{baig2015}, but few open-source or academic implementations address the complete communication lifecycle—message persistence, read receipts, typing indicators, online presence, and unread count management—within a single healthcare platform. Swasthya Sathi's Socket.io implementation handles all five concerns within a JWT-authenticated socket middleware layer.
+
+\subsection{Summary Gap}
+
+No existing academic prototype or commercial platform simultaneously addresses: (a) multi-role dashboards with route-level access control, (b) doctor identity verification with an admin feedback loop, (c) real-time chat with full message lifecycle management, (d) token-secured emergency QR data access, (e) patient-controlled medical update consent with expiry, and (f) AI-assisted report text extraction. Table~\ref{tab:comparison} summarizes this gap.
+
+\begin{table}[h]
+\caption{Feature Comparison: Existing Platforms vs. Swasthya Sathi}
+\label{tab:comparison}
+\centering
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{|p{2.8cm}|c|c|c|c|}
+\hline
+\textbf{Feature} & \textbf{Practo} & \textbf{MyChart} & \textbf{1mg} & \textbf{Ours} \\
+\hline
+Role-Based Dashboards    & \checkmark & \checkmark & $\times$   & \checkmark \\
+Doctor Verification      & Partial    & \checkmark & $\times$   & \checkmark \\
+Real-Time Chat           & $\times$   & $\times$   & $\times$   & \checkmark \\
+QR Emergency Access      & $\times$   & $\times$   & $\times$   & \checkmark \\
+Patient Update Consent   & $\times$   & $\times$   & $\times$   & \checkmark \\
+AI Report Analysis       & $\times$   & $\times$   & $\times$   & \checkmark \\
+Medication Reminders     & Partial    & \checkmark & \checkmark & \checkmark \\
+Family Access            & $\times$   & Partial    & $\times$   & Planned    \\
+Open / Self-Hostable     & $\times$   & $\times$   & $\times$   & \checkmark \\
+\hline
+\end{tabular}
+\end{table}
+
+\end{document}

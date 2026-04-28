@@ -42,6 +42,7 @@ import ManageAvailability from './pages/dashboards/doctor/ManageAvailability';
 import DoctorAppointments from './pages/dashboards/doctor/DoctorAppointments';
 import DoctorEarnings from './pages/dashboards/doctor/DoctorEarnings';
 import DoctorStatistics from './pages/dashboards/doctor/DoctorStatistics';
+import VerificationStatusPage from './pages/dashboards/doctor/VerificationStatusPage';
 
 // Chat
 import ChatPage from './pages/chat/ChatPage';
@@ -146,7 +147,7 @@ function App() {
               <Route index element={<DoctorOverview />} />
               <Route path="onboarding" element={<DoctorOnboardingStepper />} />
               <Route path="profile" element={<DoctorProfile />} />
-              <Route path="verification" element={<PlaceholderPage title="Verification Status" />} />
+              <Route path="verification" element={<VerificationStatusPage />} />
               <Route path="patients" element={<DoctorPatients />} />
               <Route path="request-update/:patientId" element={<RequestUpdateForm />} />
               <Route path="sent-requests" element={<DoctorSentRequests />} />

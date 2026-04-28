@@ -134,8 +134,8 @@ const DoctorDashboard = () => {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
           <div className="max-w-7xl mx-auto">
-            {/* Show verification status banner globally if not approved, or specifically on verification page */}
-            {profile && (location.pathname === '/doctor-dashboard/verification' || profile.verificationStatus !== 'approved') && (
+            {/* Global banner: show on all pages EXCEPT the dedicated verification page, and only when not approved */}
+            {profile && profile.verificationStatus !== 'approved' && location.pathname !== '/doctor-dashboard/verification' && (
               <DoctorVerificationStatus
                 status={profile.verificationStatus}
                 reason={profile.rejectionReason}
